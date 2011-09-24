@@ -1,3 +1,9 @@
+/*!
+ * Conway-Collab
+ * Copyright(c) 2011 Hugh Kennedy <hughskennedy@gmail.com>
+ * MIT Licensed
+ */
+
 exports.Grid = function(width,height,now) {
 	this.overall = {
 		generations:0,
