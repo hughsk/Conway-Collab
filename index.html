@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Conway's Collaborative Game of Life</title>
+
+	<meta name="viewport" content="width=1100; initial-scale=1">
+	<meta charset="utf-8">
+
+	<link rel="stylesheet" href="style.less"/>
+	
+	<link href='http://fonts.googleapis.com/css?family=Merienda+One|Coustard' rel='stylesheet' type='text/css' />
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+	<script src="/nowjs/now.js"></script>
+
+	<script>
+	//Make sure jQuery and NowJS are both ready before beginning
+	window.cells = [];
+	window.jready = window.nready = false;
+
+	now.ready(function() { window.nready = true; if (window.jready) bothReady(); });
+	$(document).ready(function() { window.jready = true; if (window.nready) bothReady(); });
+	
+	function bothReady() {
+		loadGrid($('#grid'));
+		updateStats();
+	}
+
+	/*
+	 * Initiates NowJS Functions
+	 */
+	function loadGrid(obj) {
+
+		//Used to create the whole grid, populated as is from the server
+		now.getGrid(function(w,h,cells) {
+			obj.html('');
+			for (var y = 0; y < h; y++) {
+				var row = $(document.createElement('tr'));
+				obj.append(row);
+				for (var x = 0; x < w; x++) {
+					var cell = $(document.createElement('td'));
+					cell.addClass(cells[x+y*w] ? 'on' : 'off');					
+					cell.data('cx',x); cell.data('cy',y);
+					row.append(cell);
+					window.cells.push(cell);
+				}
+			}
+			
+			var clk = function(event) {
+				console.log(event.target.nodeName);				
+				if (event.target.nodeName.toUpperCase() == 'TD') {
+					var cell = $(event.target);
+					now.setGrid(cell.data('cx'),cell.data('cy'), cell.hasClass('on') ? 0 : 1);
+				}
+			}
+			$(obj).click(clk);
+		});
+
+		//Used to update the whole grid
+		now.updateGrid = function(w,h,cells) {
+			for (var i = 0, l = window.cells.length; i < l; i++) {				
+				setCell(i,cells[i],false);
+			}
+
+			updateStats();
+
+			now.getDelay(function(delay) {
+				$('#timer .inside').stop().css('width','0%').animate({
+					width:'100%'
+				}, delay*0.95);
+			});
+		};
+
+		//Received when a single cell changes on the server
+		now.updateCell = function(id,v) {
+			setCell(id,v,true);			
+		}
+
+		//Aesthetic changes on reset
+		now.reset = function() {
+			$("#grid").addClass('flash');
+			setTimeout(function() {
+				$("#grid").removeClass('flash');
+			},500);
+		}
+	}
+
+	/*
+	 * Change the value of a single cell on the client, in response to the server
+	 */
+	function setCell(id,v,user) {
+		(function() {
+			var cell = window.cells[id];
+			var value = cell.hasClass('on');
+			if (v != value) {
+				cell.removeClass('on off');
+				cell.addClass(v ? 'on' : 'off');
+				if (user) cell.addClass('user'); else
+				if (cell.hasClass('user')) cell.removeClass('user');
+			}
+		})();
+	}
+
+	/*
+	 * Update statistics sent from the server
+	 */
+	function updateStats() {
+		var stats_current = $('section.current');
+		var stats_overall = $('section.best');
+
+		now.getGens(function(gens) {
+			$('.generations .d',stats_current).text(gens);
+		});
+		now.getPop(function(population) {
+			$('.pop .d',stats_current).text(Math.round(population*100)/100);
+		});
+		now.getGametime(function(time) {
+			$('.time .d',stats_current).text(Math.floor(time/60));
+		});
+		now.getOverall(function(overall) {
+			$('.generations .d', stats_overall).text(overall.generations);
+			$('.generations_best .d', stats_overall).text(overall.generations_best);
+			$('.time_best .d', stats_overall).text(Math.floor(overall.time_best/60));
+			$('.pop_average .d', stats_overall).text(Math.round(overall.pop_average*100)/100);
+		});
+	}
+
+	
+	</script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="conway">
+			<h1>Conway's Collaborative Game of Life</h1>
+			<section class="current"><h2>Current Game</h2>
+				<p class="generations"><strong>Generations:</strong> <span class="t d">0</span></p><div class="clear"></div>
+				<p class="time"><strong>Time Survived:</strong> <span class="t"><span class="d">0</span> mins</span></p><div class="clear"></div>
+				<p class="pop"><strong>Population:</strong> <span class="t"><span class="d">0</span>%</span></p><div class="clear"></div>
+			</section>
+			<table id="grid"></table>
+			<section class="best"><h2>Overall</h2>
+				<p class="generations"><strong>Generations:</strong> <span class="t d">0</span></p>
+				<p class="generations_best"><strong>Most Generations Survived:</strong> <span class="t d">0</span></p><div class="clear"></div>
+				<p class="time_best"><strong>Longest Time Survived:</strong> <span class="t"><span class="d">0</span> mins</span></p><div class="clear"></div>
+				<p class="pop_average"><strong>Average Population:</strong> <span class="t"><span class="d">0</span>%</span></p><div class="clear"></div>
+			</section>
+			<div class="clear"></div>
+
+			<div id="timer">
+				<div class="inside"></div>
+			</div>
+		</div>
+	</div>
+
+	<article id="info">
+		<p><a href="" title="Wikipedia: Conway's Game of Life">Conway's Game of Life</a> is the textbook example of <em>Cellular Automata</em>. Each cell follows a simple set of rules that decides if it will survive in the next generation, based on the amount of neighbouring cells, in this case:</p>
+		<ul>
+			<li><strong>Less than 2</strong> - the cells dies, as if by underpopulation.</li>
+			<li><strong>2 or 3</strong> - the cell survies to the next generation.</li>
+			<li><strong>More than 3</strong> - the cells dies, as if by overpopulation.</li>
+			<li><strong>Exactly 3</strong> - a new cell is born, as if by reproduction.</li>
+		</ul>
+		<p>In <em>this version of the game</em>, everybody plays with the same grid at the same time. It's your collective goal to keep the cell population <em>above 5%</em> for as long as possible, or the game will reset. The cells can survive on their own for a limited amount of time, but to keep them alive for as many generations as possible you'll have to intervene by creating and killing cells at will! This is easy on your own at first but as time goes on generations will advance at accelerating speeds.</p>	
+		<p>Designed and developed during spare time over the course of a week by <a href="http://hughskennedy.com" title="Hugh Kennedy">Hugh Kennedy</a> using <a href="http://nodejs.org" title="Node.JS">Node.JS</a> to run the server and <a title="NowJS" href="">NowJS</a> to handle any otherwise nasty real-time stuff.</p>
+	</article>
+</body></html>

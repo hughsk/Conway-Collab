@@ -1,0 +1,97 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;vertical-align: baseline;}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {display: block;}
+body {line-height: 1;}
+ol, ul {list-style: none;}
+blockquote, q {quotes: none;}
+blockquote:before, blockquote:after,
+q:before, q:after {content: '';content: none;}
+
+/* Conway LESS */
+.inline-block {
+	display:inline-block;
+}
+
+.fn-p {
+	color:#e9e9e9;
+	font-family:'Coustard',Garamond,Georgia;
+}
+
+.fn-h {
+	font-family:'Merienda One',Helvetica,Arial;
+	color:#eee;
+}
+
+.stat-c(@value) {
+	h2 {color:#f2f2f2;}
+	p {color:#e6e6e6*@value;
+		span.t {color:#aaa*@value;}
+	}
+}
+
+.clear {clear:both;}
+
+td {width:12px;cursor:crosshair;}
+tr {height:12px;}
+td.off {background:#484848;
+	-moz-transition:background-color 0.115s linear;
+	-webkit-transition:background-color 0.115s linear;
+	transition:background-color 0.115s linear;
+}
+td.on {background-image:url('/on.png');background-position:center center;repeat:no-repeat;}
+td.on.user {background-image:url('/user.png');}
+td.off.user {background:#464646;}
+table {border-spacing:1px;box-shadow:0px 0px 5px -1px #222;}
+table.flash {
+	background:#f28044;
+}
+body {background:#333;}
+
+table, section {.inline-block;float:left;}
+section {padding:0 10px;text-align:center;width:195px;}
+
+#conway, #info {width:1081px;margin:0 auto;}
+#wrapper {width:100%;min-width:1081px;padding:10px 0 50px 0;background:#444;
+	box-shadow:1px 10px 20px -5px #222;
+}
+h1 {text-align:center;height:70px;line-height:70px;font-size:32px;}
+h2 {font-size:24px;}
+h1, h2 {.fn-h;}
+p {.fn-p;}
+section {
+	margin-top:10px;
+	h2 {position:relative;left:-10px;padding-left:10px;padding-bottom:10px;border-bottom:1px solid #404040;}
+	&.current h2 {left:10px;padding-right:10px;}
+	p {
+		font-size:16px;
+		padding:15px 0 10px 0;
+		strong {.inline-block;width:100%;font-weight:bold;}
+		span.t {.inline-block;width:100%;font-size:24px;padding-top:5px;}
+	}
+}
+section.current {text-align:right;.stat-c(1);}
+section.best {text-align:left;.stat-c(0.9);}
+
+#timer {
+	width:651px;
+	height:10px;
+	background:#333;
+	margin:10px auto 0 auto;
+	position:relative;
+	.inside {width:0%;background:#555;height:10px;}
+	box-shadow:0px 0px 5px -1px #222;
+}
+
+#info {
+	width:650px;
+	padding-top:40px;
+	font-size:18px;line-height:1.25em;
+	ul, p {padding:0 0 15px 0;}
+	li {list-style-type:circle;color:#fff;.fn-p;margin-left:30px;}
+	em, strong {font-weight:bold;}
+	a {color:#00a6f2;text-decoration:none;}
+}
